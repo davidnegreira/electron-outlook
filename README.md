@@ -43,3 +43,4 @@ The released application can be downloaded [here](https://github.com/eNkru/elect
 
 ## License
 [MIT](https://github.com/eNkru/electron-xiami/blob/master/LICENSE) by [Howard J](https://enkru.github.io/)
+Fork David Negreira
