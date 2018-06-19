@@ -13,7 +13,8 @@ class TrayController {
         this.tray = new Tray(this.createTrayIcon(''))
 
         const context = Menu.buildFromTemplate([
-            {label: 'Quit', click: () => this.cleanupAndQuit()}
+            {label: 'Mostrar', click: () => this.mailController.toggleWindow()},
+            {label: 'Quit', click: () => this.cleanupAndQuit()},
         ])
 
         this.tray.setContextMenu(context)
@@ -34,7 +35,7 @@ class TrayController {
             trayIcon.setTemplateImage(true)
             return trayIcon
         } else {
-            iconPath = value ? '../../assets/outlook_linux_unread.png' : '../../assets/outlook_linux_black.png'
+            iconPath = value >= 1 ? '../../assets/outlook_linux_unread.png' : '../../assets/outlook_linux_black.png'
             return nativeImage.createFromPath(path.join(__dirname, iconPath))
         }
     }

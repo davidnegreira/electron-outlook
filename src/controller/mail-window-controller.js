@@ -1,7 +1,7 @@
 const { BrowserWindow, shell } = require('electron')
 const CssInjector = require('../js/css-injector')
 
-const outlookUrl = 'https://outlook.live.com/mail'
+const outlookUrl = 'https://outlook.office365.com/owa/'
 
 class MailWindowController {
     constructor() {
@@ -11,13 +11,11 @@ class MailWindowController {
     init() {
         // Create the browser window.
         this.win = new BrowserWindow({
-            x: 100,
-            y: 100,
-            width: 1400,
-            height: 900,
             frame: false,
             autoHideMenuBar: true
         })
+
+        this.win.maximize();
 
         // and load the index.html of the app.
         this.win.loadURL(outlookUrl)
@@ -40,7 +38,7 @@ class MailWindowController {
 
         // insert styles
         this.win.webContents.on('dom-ready', () => {
-            this.win.webContents.insertCSS(CssInjector.main)
+            //this.win.webContents.insertCSS(CssInjector.main)
             this.getUnreadNumber()
             this.addUnreadNumberObserver()
         })
@@ -52,12 +50,8 @@ class MailWindowController {
     getUnreadNumber() {
         this.win.webContents.executeJavaScript(`
             setTimeout(() => {
-                let unreadSpan = document.querySelector('.o30C-0mPu4HVLw3tCQIgs');
+                let unreadSpan = document.querySelector("[title='Bandeja de entrada']").nextElementSibling;
                 unreadSpan = unreadSpan.cloneNode(true);
-                unreadSpan.childNodes.forEach(item => {
-                    if (item.tagName) unreadSpan.removeChild(item);
-                });
-                console.log(unreadSpan.innerText);
                 require('electron').ipcRenderer.send('updateUnread', unreadSpan.innerText);
             }, 10000);
         `)
@@ -66,19 +60,14 @@ class MailWindowController {
     addUnreadNumberObserver() {
         this.win.webContents.executeJavaScript(`
             setTimeout(() => {
-                let unreadSpan = document.querySelector('.o30C-0mPu4HVLw3tCQIgs.q0S8YscBsDIqHYd_faniH');
+                let unreadSpan = document.querySelector("[title='Bandeja de entrada']").nextElementSibling;
                 let observer = new MutationObserver(mutations => {
                     mutations.forEach(mutation => {
-                        console.log('Find change....');
                         let copiedSpan = unreadSpan.cloneNode(true);
-                        copiedSpan.childNodes.forEach(item => {
-                            if (item.tagName) copiedSpan.removeChild(item);
-                        });
                         require('electron').ipcRenderer.send('updateUnread', copiedSpan.innerText);
                     });
                 });
-            
-                observer.observe(unreadSpan, {childList: true});
+                observer.observe(unreadSpan, { attributes: true, childList: true, characterData: true });
             }, 10000);
         `)
     }
